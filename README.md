@@ -1,4 +1,4 @@
-img width="1344" height="768" alt="primity_logo" src="https://github.com/user-attachments/assets/8b5c3147-ac38-43cb-9852-178c47507c26" />
+<img width="1344" height="768" alt="primity_logo" src="https://github.com/user-attachments/assets/8b5c3147-ac38-43cb-9852-178c47507c26" />
 
 # Type-Safe Primitives for Swift
 
