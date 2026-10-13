@@ -27,7 +27,7 @@ public struct Within<LowerBound: Bound, UpperBound: Bound, Wrapped: Withinable>:
     /// The underlying value, guaranteed to be within the specified range.
     public let wrapped: Wrapped
 
-    /// Creates an instance by wrapping the given value, or returns `nil` if it is out of bounds.
+    /// Creates an instance by wrapping the given value, or throws if it is out of bounds.
     public init(_ value: Wrapped) throws(Error) {
         let range = LowerBound.value...UpperBound.value
         guard value.isWithin(range) else { throw Error(value) }

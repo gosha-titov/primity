@@ -16,7 +16,7 @@ public struct NonEmpty<Wrapped>: MaybeWrapping where Wrapped: Emptyable {
 
     /// Creates an instance by wrapping the given value, or throws if the value is empty.
     public init(_ value: Wrapped) throws(Error) {
-        guard !value.isEmpty else { throw Error(value) }
+        guard !value.isEmpty else { throw Error() }
         self.wrapped = value
     }
 
@@ -28,17 +28,9 @@ extension NonEmpty {
     /// An error thrown when a empty value is rejected.
     public struct Error: Swift.Error, CustomStringConvertible {
 
-        /// The value that failed validation.
-        public let value: Wrapped
-
         /// A description of the error.
         public var description: String {
-            "Value '\(value)' must not be empty"
-        }
-
-        /// Creates an error for the given rejected value.
-        internal init(_ value: Wrapped) {
-            self.value = value
+            "Value must not be empty"
         }
 
     }
