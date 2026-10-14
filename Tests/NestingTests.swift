@@ -8,7 +8,7 @@ import Testing
 internal struct NestingTests {
 
     @Test internal func tag() {
-        typealias Tag = NonEmpty<Lowercased<Truncated<`100`, Collapsed<Trimmed<Stripped<String>>>>>>
+        typealias Tag = NonEmpty<Lowercased<First<`100`, Collapsed<Trimmed<Stripped<String>>>>>>
         var tag: Tag! = "  Swift   💙 DEvelopment   💻  "
         #expect(tag == "swift development")
         tag = " 💙 \n 💻"
@@ -32,10 +32,10 @@ internal struct NestingTests {
     }
 
     @Test internal func order() {
-        typealias CollapseThenTruncate = Truncated<`3`, Collapsed<String>>
-        typealias TruncateThenCollapse = Collapsed<Truncated<`3`, String>>
-        #expect(CollapseThenTruncate("a     b") == "a b")
-        #expect(TruncateThenCollapse("a     b") == "a ")
+        typealias CollapseThenCut = First<`3`, Collapsed<String>>
+        typealias CutThenCollapse = Collapsed<First<`3`, String>>
+        #expect(CollapseThenCut("a     b") == "a b")
+        #expect(CutThenCollapse("a     b") == "a ")
     }
 
     @Test internal func numbers() {

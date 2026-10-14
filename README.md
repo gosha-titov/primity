@@ -100,7 +100,7 @@ There are two kinds of primitives.
   * `Trimmed`, `Collapsed`, `Ragged`, `Stripped` — whitespace and decorative symbols.
   * `Capitalized`, `Lowercased`, `Uppercased` — casing.
   * `Sorted` (via `Ascended`, `Descended`) — ordering.
-  * `Truncated` — length limit.
+  * `First`, `Last` — keep only the first or last elements or characters.
   * `Clamped` — clamps to a closed range.
 
 Look at the names. Adjusters are participles with _-ed_: they tell you
@@ -115,7 +115,7 @@ Naming matters.
 Stack them. Each layer does one thing. Wrappers apply right to left:
 
 ```swift
-typealias Tag = NonEmpty<Lowercased<Truncated<`32`,Collapsed<Trimmed<Stripped<String>>>>>>
+typealias Tag = NonEmpty<Lowercased<First<`32`,Collapsed<Trimmed<Stripped<String>>>>>>
 
 let tag: Tag? = "  Swift   💙 DEVelopment   💻  "
 // "swift development"
@@ -128,17 +128,17 @@ let tag = string
     .stripped()          // remove decorative symbols
     .trimmed()           // trim edges
     .collapsed()         // collapse multiple spaces into one
-    .truncated(to: 32)   // cut to length limit
+    .first(32)           // keep the first 32 characters
     .lowercased()        // convert to lowercase
 ```
 
-Order matters. If you truncate first and then collapse spaces,
+Order matters. If you cut the value first and then collapse spaces,
 the result may end up shorter than intended.
 
 A few compositions I use every day:
 
 ```swift
-typealias Title = NonEmpty<Truncated<`256`, Collapsed<Trimmed<String>>>>
+typealias Title = NonEmpty<First<`256`, Collapsed<Trimmed<String>>>>
 
 typealias Rating = Clamped<`1`, `5`, Int>
 
@@ -150,7 +150,7 @@ You can also name the bounds once and reuse them:
 ```swift
 typealias TwoThroughTen<Value: Withinable> = Within<`2`, `10`, Value> where Value.Bound == Int
 
-typealias AnswerOption = NonEmpty<Truncated<`32`, Collapsed<Trimmed<String>>>>
+typealias AnswerOption = NonEmpty<First<`32`, Collapsed<Trimmed<String>>>>
 
 typealias AnswerOptions = TwoThroughTen<Array<AnswerOption>>
 ```
@@ -189,7 +189,7 @@ let array = NonEmpty(Ascended([5, 1, 3, 2, 4]))?.asArray()
 let double = NonNegative(95.97)?.asDouble()
 
 // Base for all types:
-let text = Truncated(Collapsed(richText)).expressed()
+let text = First(Collapsed(richText)).expressed()
 ```
 
 
@@ -297,7 +297,7 @@ struct Poll {
     let options: [String]
     init?(options: [String]) {
         let options = options
-            .map { $0.trimmed().collapsed().truncated(to: 256) }
+            .map { $0.trimmed().collapsed().first(256) }
             .filter { !$0.isEmpty }
         guard (2...10).contains(options.count) else { return nil }
         self.options = options
@@ -313,7 +313,7 @@ struct Poll {
 
 extension Poll {
     typealias Options = Within<`2`, `10`, Array<Option>>
-    typealias Option = NonEmpty<Truncated<`256`, Collapsed<Trimmed<String>>>>
+    typealias Option = NonEmpty<First<`256`, Collapsed<Trimmed<String>>>>
 }
 ```
 
@@ -335,7 +335,7 @@ extension PieChart {
         let value: Int
         let label: String
         init?(value: Int, label: String) {
-            let label = label.trimmed().collapsed().truncated(to: 64)
+            let label = label.trimmed().collapsed().first(64)
             guard !label.isEmpty, value > 0 else { return nil }
             self.value = value
             self.label = label
@@ -352,7 +352,7 @@ struct PieChart {
 
 extension PieChart {
     struct Sector {
-        let label: NonEmpty<Truncated<`64`, Collapsed<Trimmed<String>>>>
+        let label: NonEmpty<First<`64`, Collapsed<Trimmed<String>>>>
         let value: Positive<Int>
     }
 }
@@ -368,8 +368,8 @@ struct Place {
     let latitude: Double
     let longitude: Double
     init?(name: String, address: String?, latitude: Double, longitude: Double) {
-        let name = name.trimmed().collapsed().truncated(to: 64)
-        let address = address?.stripped().trimmed().collapsed().truncated(to: 256)
+        let name = name.trimmed().collapsed().first(64)
+        let address = address?.stripped().trimmed().collapsed().first(256)
         guard !name.isEmpty, (-90...90).contains(latitude), (-180...180).contains(longitude) else { return nil }
         self.name = name
         self.address = if let address, !address.isEmpty { address } else { nil }
@@ -389,8 +389,8 @@ struct Place {
 }
 
 extension Place {
-    typealias Name = NonEmpty<Truncated<`64`, Collapsed<Trimmed<String>>>>
-    typealias Address = NonEmpty<Truncated<`256`, Collapsed<Trimmed<Stripped<String>>>>>
+    typealias Name = NonEmpty<First<`64`, Collapsed<Trimmed<String>>>>
+    typealias Address = NonEmpty<First<`256`, Collapsed<Trimmed<Stripped<String>>>>>
     typealias Latitude = Within<`-90.0`, `90.0`, Double>
     typealias Longitude = Within<`-180.0`, `180.0`, Double>
 }
@@ -542,7 +542,7 @@ Pick what you need. The rest is automatic.
 | `Lowercased` | `lowercased()` | - |
 | `Uppercased` | `uppercased()` | - |
 | `Sorted` / `Ascended` / `Descended` | `sorted(by:)` | - |
-| `Truncated` | `prefix(_:)` | - |
+| `First` / `Last` | `prefix(_:)` / `suffix(_:)` | - |
 | `Clamped` | `min(_:max:)` + `max(_:min:)` | - |
 | `NonEmpty` | `isEmpty` + `guard` | - |
 | `NonNegative` / `Positive` | `< 0` / `> 0` + `guard` | - |

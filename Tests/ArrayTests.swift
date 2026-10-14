@@ -15,6 +15,12 @@ internal struct ArrayTests {
         #expect(nonEmpty.asArray() == [3, 1, 2])
     }
 
+    @Test internal func empty() {
+        #expect(Ascended<[Int]>.empty.asArray().isEmpty)
+        #expect(Deduped<[String]>.empty.asArray().isEmpty)
+        #expect(First<`5`, [Int]>.empty.wrapped.isEmpty)
+    }
+
     @Test internal func appending() throws {
         let sorted = Sorted<AscendingSortingStrategy<Int>, [Int]>([3, 1, 2])
         #expect(sorted.appending(0) == [0, 1, 2, 3])

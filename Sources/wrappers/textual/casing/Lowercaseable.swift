@@ -32,4 +32,5 @@ extension Collapsed: Lowercaseable where Wrapped: Lowercaseable {}
 extension Ragged: Lowercaseable where Wrapped: Lowercaseable {}
 extension Stripped: Lowercaseable where Wrapped: Lowercaseable {}
 extension Trimmed: Lowercaseable where Wrapped: Lowercaseable {}
-extension Truncated: Lowercaseable where Wrapped: Lowercaseable {}
+extension First: Lowercaseable where Wrapped: Lowercaseable {}
+extension Last: Lowercaseable where Wrapped: Lowercaseable {}

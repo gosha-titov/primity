@@ -39,4 +39,5 @@ extension Collapsed: Capitalizable where Wrapped: Capitalizable {}
 extension Ragged: Capitalizable where Wrapped: Capitalizable {}
 extension Stripped: Capitalizable where Wrapped: Capitalizable {}
 extension Trimmed: Capitalizable where Wrapped: Capitalizable {}
-extension Truncated: Capitalizable where Wrapped: Capitalizable {}
+extension First: Capitalizable where Wrapped: Capitalizable {}
+extension Last: Capitalizable where Wrapped: Capitalizable {}

@@ -26,24 +26,16 @@ public protocol SortingStrategy: Sendable {
 }
 
 
-// swiftlint:disable one_declaration_per_file
-
 /// A sorting strategy that orders elements in ascending order (smallest first).
 public enum AscendingSortingStrategy<Element>: SortingStrategy where Element: Comparable {
-
     public static func areInIncreasingOrder(lhs: Element, rhs: Element) -> Bool {
         return lhs < rhs
     }
-
 }
 
 /// A sorting strategy that orders elements in descending order (largest first).
 public enum DescendingSortingStrategy<Element>: SortingStrategy where Element: Comparable {
-
     public static func areInIncreasingOrder(lhs: Element, rhs: Element) -> Bool {
         return lhs > rhs
     }
-
 }
-
-// swiftlint:enable one_declaration_per_file

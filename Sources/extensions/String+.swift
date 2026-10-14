@@ -14,5 +14,11 @@ extension String {
     internal static var space: String {
         return " "
     }
+    
+    /// The empty string.
+    @inline(__always)
+    internal static var empty: String {
+        return ""
+    }
 
 }
