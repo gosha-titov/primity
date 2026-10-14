@@ -10,6 +10,19 @@ public protocol Positivable {
 }
 
 
+extension Wrapping where Wrapped: Positivable {
+
+    @_transparent
+    public var isPositive: Bool {
+        return wrapped.isPositive
+    }
+
+}
+
+
+extension RoundedWith: Positivable where Wrapped: Positivable {}
+
+
 extension Double: Positivable {
     public var isPositive: Bool {
         return self > .zero

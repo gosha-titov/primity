@@ -45,5 +45,6 @@ extension Lowercased: Collapsible where Wrapped: Collapsible {}
 extension Ragged: Collapsible where Wrapped: Collapsible {}
 extension Stripped: Collapsible where Wrapped: Collapsible {}
 extension Trimmed: Collapsible where Wrapped: Collapsible {}
-extension Truncated: Collapsible where Wrapped: Collapsible {}
+extension First: Collapsible where Wrapped: Collapsible {}
+extension Last: Collapsible where Wrapped: Collapsible {}
 extension Uppercased: Collapsible where Wrapped: Collapsible {}

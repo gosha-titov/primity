@@ -16,7 +16,7 @@
 ///
 /// let percentage: Percentage = 97
 /// ```
-public struct Clamped<LowerBound: Bound, UpperBound: Bound, Wrapped: Clampable>: Wrapping where LowerBound.Value == UpperBound.Value, LowerBound.Value == Wrapped.Bound {
+public struct Clamped<LowerBound: Constant, UpperBound: Constant, Wrapped: Clampable>: Wrapping where LowerBound.Value == UpperBound.Value, LowerBound.Value == Wrapped.Bound {
 
     /// The underlying clamped value.
     public let wrapped: Wrapped

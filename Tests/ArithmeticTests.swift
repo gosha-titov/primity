@@ -7,6 +7,18 @@ import Testing
 
 internal struct ArithmeticTests {
 
+    @Test internal func zero() {
+        #expect(Cycled<`0`, `10`, Int>.zero == 0)
+        #expect(Cycled<`0.0`, `1.0`, Double>.zero == 0.0)
+        #expect(Clamped<`0`, `100`, Int>.zero == 0)
+        #expect(Clamped<`1`, `5`, Int>.zero == 1)
+        #expect(Rounded<`0.5`, Double>.zero == 0.0)
+
+        let index = Cycled<`0`, `10`, Int>.zero
+        #expect(index.wrapped == 0)
+        #expect(index.expressed() == 0)
+    }
+
     @Test internal func adding() throws {
         let clamped = Clamped<`0`, `100`, Int>(50)
         #expect(clamped.adding(10) == 60)

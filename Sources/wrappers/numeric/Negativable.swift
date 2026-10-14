@@ -10,6 +10,19 @@ public protocol Negativable {
 }
 
 
+extension Wrapping where Wrapped: Negativable {
+
+    @_transparent
+    public var isNegative: Bool {
+        return wrapped.isNegative
+    }
+
+}
+
+
+extension RoundedWith: Negativable where Wrapped: Negativable {}
+
+
 extension Double: Negativable {
     public var isNegative: Bool {
         return self < .zero

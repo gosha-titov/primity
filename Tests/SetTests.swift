@@ -79,16 +79,10 @@ internal struct SetTests {
 
 
 extension SetTests {
-
-    /// A minimal `Wrapping` wrapper over a set, used to exercise the non-failable behavior paths.
     private struct TestWrapper: Wrapping, Expressible {
-
         let wrapped: Set<Int>
-
         init(_ value: Set<Int>) {
             self.wrapped = value
         }
-
     }
-
 }

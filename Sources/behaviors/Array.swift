@@ -1,6 +1,16 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 gosha
 // SPDX-License-Identifier: MIT
 
+extension Wrapping where Wrapped: Expressible, Wrapped.Expressed: _PrimityArray {
+
+    /// The empty array.
+    public static var empty: Self {
+        return Self(expressing: [Wrapped.Expressed.Element]() as! Wrapped.Expressed)
+    }
+
+}
+
+
 extension AnyWrapping where Self: AnyExpressible, Wrapped: AnyExpressible, Wrapped.Expressed: _PrimityArray {
 
     /// Unwraps the innermost raw array.

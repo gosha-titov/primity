@@ -29,7 +29,7 @@ The library has no dependencies. All you need is this, in `Package.swift`:
 dependencies: [
     .package(
         url: "https://github.com/gosha-titov/primity.git",
-        .upToNextMinor(from: "3.0.0")
+        .upToNextMinor(from: "4.0.0")
     )
 ]
 ```
@@ -92,22 +92,29 @@ There are two kinds of primitives.
 (and offer an `init?` convenience):
 
   * `NonEmpty` — the value is not empty.
-  * `NonNegative`, `Positive` — numeric bounds.
-  * `Within` — the value (or element count) is within bounds.
+  * `NonNegative`, `Positive` — numeric sign.
+  * `Within`, `AtLeast`, `AtMost`, `Exact` — the value (or element count) is within bounds.
+  * `Unique` — no duplicate elements.
+  * `Finite` — not NaN, not infinity.
+  * `Regular` — matches a regular expression.
 
 **Adjusters** always accept and transform:
 
   * `Trimmed`, `Collapsed`, `Ragged`, `Stripped` — whitespace and decorative symbols.
-  * `Capitalized`, `Lowercased`, `Uppercased` — casing.
+  * `Capitalized`, `Lowercased`, `Uppercased`, `Folded` — casing.
   * `Sorted` (via `Ascended`, `Descended`) — ordering.
-  * `Truncated` — length limit.
+  * `Deduped` — removes duplicate elements.
+  * `First`, `Last` — keep only the first or last elements or characters.
   * `Clamped` — clamps to a closed range.
+  * `Cycled` — wraps around the bounds.
+  * `Rounded` (via `RoundedUp`, `RoundedDown`) — rounds to a step.
 
 Look at the names. Adjusters are participles with _-ed_: they tell you
 what has **already been done** to the value. Validators are adjectives:
 they tell you the **state** of the value. "Always accepts and fixes"
 versus "checks and maybe rejects." You see the difference instantly.
-Naming matters.
+Naming matters. Almost — `First` and `Last` are the deliberate exception:
+they say what remains, not what was done.
 
 
 ## Composition
@@ -115,7 +122,7 @@ Naming matters.
 Stack them. Each layer does one thing. Wrappers apply right to left:
 
 ```swift
-typealias Tag = NonEmpty<Lowercased<Truncated<`32`,Collapsed<Trimmed<Stripped<String>>>>>>
+typealias Tag = NonEmpty<Lowercased<First<`32`,Collapsed<Trimmed<Stripped<String>>>>>>
 
 let tag: Tag? = "  Swift   💙 DEVelopment   💻  "
 // "swift development"
@@ -128,17 +135,17 @@ let tag = string
     .stripped()          // remove decorative symbols
     .trimmed()           // trim edges
     .collapsed()         // collapse multiple spaces into one
-    .truncated(to: 32)   // cut to length limit
+    .first(32)           // keep the first 32 characters
     .lowercased()        // convert to lowercase
 ```
 
-Order matters. If you truncate first and then collapse spaces,
+Order matters. If you cut the value first and then collapse spaces,
 the result may end up shorter than intended.
 
 A few compositions I use every day:
 
 ```swift
-typealias Title = NonEmpty<Truncated<`256`, Collapsed<Trimmed<String>>>>
+typealias Title = NonEmpty<First<`256`, Collapsed<Trimmed<String>>>>
 
 typealias Rating = Clamped<`1`, `5`, Int>
 
@@ -150,7 +157,7 @@ You can also name the bounds once and reuse them:
 ```swift
 typealias TwoThroughTen<Value: Withinable> = Within<`2`, `10`, Value> where Value.Bound == Int
 
-typealias AnswerOption = NonEmpty<Truncated<`32`, Collapsed<Trimmed<String>>>>
+typealias AnswerOption = NonEmpty<First<`32`, Collapsed<Trimmed<String>>>>
 
 typealias AnswerOptions = TwoThroughTen<Array<AnswerOption>>
 ```
@@ -189,7 +196,7 @@ let array = NonEmpty(Ascended([5, 1, 3, 2, 4]))?.asArray()
 let double = NonNegative(95.97)?.asDouble()
 
 // Base for all types:
-let text = Truncated(Collapsed(richText)).expressed()
+let text = First(Collapsed(richText)).expressed()
 ```
 
 
@@ -240,6 +247,18 @@ let letters = NonEmpty<String>.single("f")
 let numbers = NonEmpty<Array<Int>>.single(10)
 
 let greetings = NonEmpty<Dictionary<String, String>>.single("Hello", for: "en")
+```
+
+Identity values come for free, too. Numeric wrappers get `.zero`, and
+collection and string wrappers get `.empty` — a ready-made start value
+with no literal at hand:
+
+```swift
+typealias BannerIndex = Cycled<`0`, `9`, Int>
+let index = BannerIndex.zero
+
+typealias Tags = Deduped<Array<String>>
+let tags = Tags.empty
 ```
 
 
@@ -297,7 +316,7 @@ struct Poll {
     let options: [String]
     init?(options: [String]) {
         let options = options
-            .map { $0.trimmed().collapsed().truncated(to: 256) }
+            .map { $0.trimmed().collapsed().first(256) }
             .filter { !$0.isEmpty }
         guard (2...10).contains(options.count) else { return nil }
         self.options = options
@@ -313,7 +332,7 @@ struct Poll {
 
 extension Poll {
     typealias Options = Within<`2`, `10`, Array<Option>>
-    typealias Option = NonEmpty<Truncated<`256`, Collapsed<Trimmed<String>>>>
+    typealias Option = NonEmpty<First<`256`, Collapsed<Trimmed<String>>>>
 }
 ```
 
@@ -335,7 +354,7 @@ extension PieChart {
         let value: Int
         let label: String
         init?(value: Int, label: String) {
-            let label = label.trimmed().collapsed().truncated(to: 64)
+            let label = label.trimmed().collapsed().first(64)
             guard !label.isEmpty, value > 0 else { return nil }
             self.value = value
             self.label = label
@@ -352,9 +371,62 @@ struct PieChart {
 
 extension PieChart {
     struct Sector {
-        let label: NonEmpty<Truncated<`64`, Collapsed<Trimmed<String>>>>
+        let label: NonEmpty<First<`64`, Collapsed<Trimmed<String>>>>
         let value: Positive<Int>
     }
+}
+```
+
+### A chess board.
+
+```swift
+// Before
+extension Chess {
+    struct Board {
+        let rows: [[Square]]
+        init?(_ rows: [[Square]]) {
+            guard rows.count == 8,
+                  rows.allSatisfy({ $0.count == 8 })
+            else { return nil }
+            self.rows = rows
+        }
+    }
+}
+```
+
+```swift
+// After
+extension Chess {
+    typealias Board = Exact<`8`, Array<Row>>
+    typealias Row = Exact<`8`, Array<Square>>
+}
+```
+
+### An edit.
+
+```swift
+// Before
+extension Edit {
+    struct Rotation {
+        let degrees: Int
+        init(_ degrees: Int) {
+            self.degrees = (degrees % 360 + 360) % 360
+        }
+    }
+    struct History {
+        let changes: [Change]
+        init(_ changes: [Change]) {
+            self.changes = changes.count > 50 ? Array(changes.suffix(50)) : changes
+        }
+    }
+}
+```
+
+```swift
+// After
+extension Edit {
+    typealias Rotation = Cycled<`0`, `360`, Int>
+    typealias History = Last<`50`, Array<Change>>
 }
 ```
 
@@ -368,8 +440,8 @@ struct Place {
     let latitude: Double
     let longitude: Double
     init?(name: String, address: String?, latitude: Double, longitude: Double) {
-        let name = name.trimmed().collapsed().truncated(to: 64)
-        let address = address?.stripped().trimmed().collapsed().truncated(to: 256)
+        let name = name.trimmed().collapsed().first(64)
+        let address = address?.stripped().trimmed().collapsed().first(256)
         guard !name.isEmpty, (-90...90).contains(latitude), (-180...180).contains(longitude) else { return nil }
         self.name = name
         self.address = if let address, !address.isEmpty { address } else { nil }
@@ -389,10 +461,55 @@ struct Place {
 }
 
 extension Place {
-    typealias Name = NonEmpty<Truncated<`64`, Collapsed<Trimmed<String>>>>
-    typealias Address = NonEmpty<Truncated<`256`, Collapsed<Trimmed<Stripped<String>>>>>
+    typealias Name = NonEmpty<First<`64`, Collapsed<Trimmed<String>>>>
+    typealias Address = NonEmpty<First<`256`, Collapsed<Trimmed<Stripped<String>>>>>
     typealias Latitude = Within<`-90.0`, `90.0`, Double>
     typealias Longitude = Within<`-180.0`, `180.0`, Double>
+}
+```
+
+### A review.
+
+```swift
+// Before
+struct Review {
+    let email: String
+    let rating: Double
+    let text: String
+    let attachments: [Attachment]
+
+    init?(email: String, rating: Double, text: String, attachments: [Attachment]) {
+        let rating = ((rating * 4).rounded() / 4).clamped(to: 0...5)
+        let text = text.trimmed().first(1000)
+        let email = email.trimmed().folded()
+        guard email.wholeMatch(of: Constants.emailPattern) != nil,
+              rating.isFinite,
+              !text.isEmpty,
+              attachments.count <= 5,
+              Set(attachments).count == attachments.count
+        else { return nil }
+        self.email = email
+        self.rating = rating
+        self.text = text
+        self.attachments = attachments
+    }
+}
+```
+
+```swift
+// After
+struct Review {
+    let email: Email
+    let rating: Rating
+    let text: Text
+    let attachments: Attachments
+}
+
+extension Review {
+    typealias Email = Regular<EmailPattern, Folded<Trimmed<String>>>
+    typealias Rating = Clamped<`0.0`, `5.0`, Rounded<`0.25`, Finite<Double>>>
+    typealias Text = NonEmpty<First<`1000`, Trimmed<String>>>
+    typealias Attachments = AtMost<`5`, Unique<Array<Attachment>>>
 }
 ```
 
@@ -530,23 +647,38 @@ extension Normalized: Trimmable where Wrapped: Trimmable {}
 Pick what you need. The rest is automatic.
 
 
-## Our Types vs. Their Methods
+## All Primitives
 
-| Primity | Swift Standard Library | Foundation |
-| ------ | ------ | ------ |
-| `Trimmed` | - | `trimmingCharacters(in:)` |
-| `Collapsed` | - | - |
-| `Ragged` | - | - |
-| `Stripped` | - | - |
-| `Capitalized` | - | `capitalized` |
-| `Lowercased` | `lowercased()` | - |
-| `Uppercased` | `uppercased()` | - |
-| `Sorted` / `Ascended` / `Descended` | `sorted(by:)` | - |
-| `Truncated` | `prefix(_:)` | - |
-| `Clamped` | `min(_:max:)` + `max(_:min:)` | - |
-| `NonEmpty` | `isEmpty` + `guard` | - |
-| `NonNegative` / `Positive` | `< 0` / `> 0` + `guard` | - |
-| `Within` | `ClosedRange.contains(_:)` + `guard` | - |
+Validators:
+
+| Primitive | What it does |
+| ------ | ------ |
+| `NonEmpty` | rejects an empty value |
+| `NonNegative` | rejects a value below zero |
+| `Positive` | rejects zero and below |
+| `Within` | rejects a value (or element count) outside the bounds |
+| `AtLeast` / `AtMost` | rejects a value (or count) below / above the bound |
+| `Exact` | rejects any element count but the exact one |
+| `Unique` | rejects duplicate elements |
+| `Finite` | rejects NaN and infinity |
+| `Regular` | rejects a value not matching the regular expression |
+
+Adjusters:
+
+| Primitive | What it does |
+| ------ | ------ |
+| `Trimmed` | trims whitespace at the edges |
+| `Collapsed` | collapses whitespace runs into single spaces |
+| `Ragged` | trims trailing whitespace on each line |
+| `Stripped` | removes decorative symbols like emojis |
+| `Capitalized` / `Lowercased` / `Uppercased` | changes the casing |
+| `Folded` | case-folds for insensitive comparison |
+| `Sorted` / `Ascended` / `Descended` | sorts the elements |
+| `Deduped` | removes duplicate elements |
+| `First` / `Last` | keeps only the first / last elements or characters |
+| `Clamped` | clamps the value to a closed range |
+| `Cycled` | wraps the value around the bounds |
+| `Rounded` / `RoundedUp` / `RoundedDown` | rounds the value to a step |
 
 Their methods transform a value once and forget about it. Our types make
 the result impossible to lose: the guarantee travels with the value.

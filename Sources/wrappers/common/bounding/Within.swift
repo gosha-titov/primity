@@ -3,8 +3,6 @@
 
 /// A wrapper that ensures a value falls within a closed range.
 ///
-/// Returns `nil` if the value is outside the bounds during initialization.
-///
 /// ## Example 1
 /// ```
 /// typealias OneThroughFive<Wrapped: Withinable> = Within<`1`, `5`, Wrapped> where Wrapped.Bound == Int
@@ -22,7 +20,7 @@
 ///     pediatricHospital.makeApointment(for: child)
 /// }
 /// ```
-public struct Within<LowerBound: Bound, UpperBound: Bound, Wrapped: Withinable>: MaybeWrapping where LowerBound.Value == UpperBound.Value, LowerBound.Value == Wrapped.Bound {
+public struct Within<LowerBound: Constant, UpperBound: Constant, Wrapped: Withinable>: MaybeWrapping where LowerBound.Value == UpperBound.Value, LowerBound.Value == Wrapped.Bound {
 
     /// The underlying value, guaranteed to be within the specified range.
     public let wrapped: Wrapped

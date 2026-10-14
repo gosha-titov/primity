@@ -1,6 +1,16 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 gosha
 // SPDX-License-Identifier: MIT
 
+extension Wrapping where Wrapped: Expressible, Wrapped.Expressed: AdditiveArithmetic {
+
+    /// The zero value.
+    public static var zero: Self {
+        return Self(expressing: .zero)
+    }
+
+}
+
+
 extension Wrapping where Self: Expressible, Wrapped: Expressible, Wrapped.Expressed: Numeric {
 
     /// Returns a copy with the given number added to the innermost value.

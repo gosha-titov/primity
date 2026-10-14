@@ -73,16 +73,11 @@ internal struct DictionaryTests {
 
 
 extension DictionaryTests {
-    
-    /// A minimal `Wrapping` wrapper over a dictionary, used to exercise the non-failable behavior paths.
     private struct TestWrapper: Wrapping, Expressible {
-
         let wrapped: [String: Int]
-
         init(_ value: [String: Int]) {
             self.wrapped = value
         }
 
     }
-    
 }

@@ -1,6 +1,16 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 gosha
 // SPDX-License-Identifier: MIT
 
+extension Wrapping where Wrapped: Expressible, Wrapped.Expressed == String {
+
+    /// The empty string.
+    public static var empty: Self {
+        return Self(expressing: .empty)
+    }
+
+}
+
+
 extension AnyWrapping where Self: AnyExpressible, Expressed == String {
 
     /// Unwraps the innermost string.

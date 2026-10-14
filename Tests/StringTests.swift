@@ -14,6 +14,11 @@ internal struct StringTests {
         #expect(nonEmpty.asString() == "hello")
     }
 
+    @Test internal func empty() {
+        #expect(Trimmed<String>.empty.wrapped.isEmpty)
+        #expect(Collapsed<String>.empty.asString().isEmpty)
+    }
+
     @Test internal func appending() throws {
         let trimmed = Trimmed<String>("hello")
         #expect(trimmed.appending("!") == "hello!")

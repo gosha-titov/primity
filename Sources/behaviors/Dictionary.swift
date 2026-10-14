@@ -1,6 +1,16 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 gosha
 // SPDX-License-Identifier: MIT
 
+extension Wrapping where Wrapped: Expressible, Wrapped.Expressed: _PrimityDictionary {
+
+    /// The empty dictionary.
+    public static var empty: Self {
+        return Self(expressing: [Wrapped.Expressed.Key: Wrapped.Expressed.Value]() as! Wrapped.Expressed)
+    }
+
+}
+
+
 extension AnyWrapping where Self: AnyExpressible, Wrapped: AnyExpressible, Wrapped.Expressed: _PrimityDictionary {
 
     /// Unwraps the innermost dictionary.

@@ -40,5 +40,6 @@ extension Collapsed: Trimmable where Wrapped: Trimmable {}
 extension Lowercased: Trimmable where Wrapped: Trimmable {}
 extension Ragged: Trimmable where Wrapped: Trimmable {}
 extension Stripped: Trimmable where Wrapped: Trimmable {}
-extension Truncated: Trimmable where Wrapped: Trimmable {}
+extension First: Trimmable where Wrapped: Trimmable {}
+extension Last: Trimmable where Wrapped: Trimmable {}
 extension Uppercased: Trimmable where Wrapped: Trimmable {}

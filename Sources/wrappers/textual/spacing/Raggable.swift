@@ -63,5 +63,6 @@ extension Collapsed: Raggable where Wrapped: Raggable {}
 extension Lowercased: Raggable where Wrapped: Raggable {}
 extension Stripped: Raggable where Wrapped: Raggable {}
 extension Trimmed: Raggable where Wrapped: Raggable {}
-extension Truncated: Raggable where Wrapped: Raggable {}
+extension First: Raggable where Wrapped: Raggable {}
+extension Last: Raggable where Wrapped: Raggable {}
 extension Uppercased: Raggable where Wrapped: Raggable {}
